@@ -1,0 +1,7 @@
+{
+  "id": "gql",
+  "name": "GraphQL Core Engine",
+  "version": "1.0.0",
+  "system": true,
+  "grants": ["*"]
+}

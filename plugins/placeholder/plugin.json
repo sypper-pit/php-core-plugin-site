@@ -1,0 +1,7 @@
+{
+  "id": "placeholder",
+  "name": "Public Landing Placeholder Page",
+  "version": "1.0.0",
+  "system": false,
+  "grants": ["pages", "db:own"]
+}
