@@ -12,9 +12,15 @@ class Kernel
 {
     public static function boot(): void
     {
-        if (!extension_loaded('mbstring') || !extension_loaded('sodium')) {
+        $mbstringOk = extension_loaded('mbstring') || function_exists('mb_strlen');
+        $sodiumOk = extension_loaded('sodium');
+
+        if (!$mbstringOk || !$sodiumOk) {
             http_response_code(500);
-            echo "Kernel Boot Error: PHP extensions 'mbstring' and 'sodium' are required.";
+            $missing = [];
+            if (!$mbstringOk) $missing[] = "mbstring (extension or libs/polyfill-mbstring)";
+            if (!$sodiumOk) $missing[] = "sodium (extension required)";
+            echo "Kernel Boot Error: Missing required PHP extension(s)/capability: " . implode(', ', $missing) . ".";
             exit;
         }
 
