@@ -31,6 +31,16 @@ spl_autoload_register(function (string $class): void {
         if (file_exists($file)) {
             require_once $file;
         }
+    } elseif (str_starts_with($class, 'Plugins\\')) {
+        $parts = explode('\\', substr($class, 8));
+        if (count($parts) >= 2) {
+            $pluginId = strtolower($parts[0]);
+            $relative = implode('/', array_slice($parts, 1));
+            $file = APP_ROOT . '/plugins/' . $pluginId . '/src/' . $relative . '.php';
+            if (file_exists($file)) {
+                require_once $file;
+            }
+        }
     }
 });
 

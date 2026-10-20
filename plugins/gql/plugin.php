@@ -10,10 +10,12 @@ if (!defined('APP_ROOT')) {
     exit;
 }
 
+require_once __DIR__ . '/src/Engine.php';
+
 class GqlPlugin extends Plugin
 {
     public function register(): void
     {
-        // Gql is loaded by Kernel as core bus
+        // Gql engine classes loaded
     }
 }
