@@ -95,7 +95,7 @@ class AdminPlugin extends Plugin
             }
             \Core\Files::writeConfig('e2ee-envelope.json', $env);
             return true;
-        }, ['auth' => 'admin']);
+        }, ['auth' => 'public']);
 
         Registry::registerField('query', 'e2ee_status', function ($args, $context) {
             return [

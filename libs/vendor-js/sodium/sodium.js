@@ -1,1 +1,1 @@
-Not found: /libsodium-wrappers-sumo@0.7.13/dist/modules/libsodium-wrappers.js
+Couldn't find the requested file /dist/browsers/sodium.js in libsodium-wrappers-sumo.

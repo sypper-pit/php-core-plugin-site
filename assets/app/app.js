@@ -4,42 +4,48 @@ document.addEventListener('DOMContentLoaded', () => {
     if (setupForm) {
         setupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(setupForm);
-            const data = Object.fromEntries(formData.entries());
-
-            const masterPass = document.getElementById('masterPassword').value;
-            const initRes = await E2EEClient.initClient(masterPass);
-
-            // Save E2EE envelope first
-            const gqlRes = await fetch('/graphql', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    query: 'mutation($env: JSON!) { e2ee_init(envelope: $env) }',
-                    variables: { env: initRes.envelope }
-                })
-            });
-
-            // Submit setup credentials
-            const res = await fetch('/setup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            const result = await res.json();
             const msgDiv = document.getElementById('setupMsg');
-            if (result.success) {
-                const adminUrl = result.adminPath || '/panel-admin';
-                msgDiv.innerHTML = `
-                    <div style="margin-top:20px; padding:15px; border:1px solid green; background:#e8f8e8; border-radius:5px;">
-                        <h3 style="color:green; margin-top:0;">Setup Complete!</h3>
-                        <p>Recovery Key: <b>${initRes.recoveryKey}</b> (Save it safely!)</p>
-                        <p><b>Admin Panel URL:</b> <a href="${adminUrl}" id="adminPanelLink">${window.location.origin}${adminUrl}</a></p>
-                        <p style="font-size:0.9em; color:#555;">Save this secret URL! It will not be shown again.</p>
-                    </div>`;
-            } else {
-                msgDiv.innerHTML = `<p style="color:red">Setup failed: ${result.error}</p>`;
+            msgDiv.innerHTML = '<p style="color:blue">Processing setup...</p>';
+
+            try {
+                const formData = new FormData(setupForm);
+                const data = Object.fromEntries(formData.entries());
+
+                const masterPass = document.getElementById('masterPassword').value;
+                const initRes = await E2EEClient.initClient(masterPass);
+
+                // Save E2EE envelope first
+                const gqlRes = await fetch('/graphql', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        query: 'mutation($env: JSON!) { e2ee_init(envelope: $env) }',
+                        variables: { env: initRes.envelope }
+                    })
+                });
+
+                // Submit setup credentials
+                const res = await fetch('/setup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await res.json();
+                if (result.success) {
+                    const adminUrl = result.adminPath || '/panel-admin';
+                    msgDiv.innerHTML = `
+                        <div style="margin-top:20px; padding:15px; border:1px solid green; background:#e8f8e8; border-radius:5px;">
+                            <h3 style="color:green; margin-top:0;">Setup Complete!</h3>
+                            <p>Recovery Key: <b>${initRes.recoveryKey}</b> (Save it safely!)</p>
+                            <p><b>Admin Panel URL:</b> <a href="${adminUrl}" id="adminPanelLink">${window.location.origin}${adminUrl}</a></p>
+                            <p style="font-size:0.9em; color:#555;">Save this secret URL! It will not be shown again.</p>
+                        </div>`;
+                } else {
+                    msgDiv.innerHTML = `<p style="color:red">Setup failed: ${result.error}</p>`;
+                }
+            } catch (err) {
+                msgDiv.innerHTML = `<p style="color:red">Setup error: ${err.message}</p>`;
             }
         });
     }

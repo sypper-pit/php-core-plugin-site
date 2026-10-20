@@ -37,10 +37,8 @@ $context = new Context('http', $viewer, $request, $gqlExecutor);
 \Core\Report::setContext($context);
 
 // Determine Admin Route Path
-$adminPath = Files::readTextConfig('admin-path.json');
-if (!$adminPath) {
-    $adminPath = Files::readConfig('admin-path.json')['path'] ?? '/panel-admin';
-}
+$adminPathConfig = Files::readConfig('admin-path.json');
+$adminPath = $adminPathConfig['path'] ?? '/panel-admin';
 
 $uri = $request->uri;
 
