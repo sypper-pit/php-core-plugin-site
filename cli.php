@@ -33,7 +33,7 @@ switch ($command) {
         foreach ($files as $file) {
             if ($file->isDir()) continue;
             $path = $file->getPathname();
-            if (basename($path) === 'cli.php' || str_contains($path, '/plugins/store/') || str_contains($path, '/libs/sleekdb/') || str_contains($path, '/.git/')) {
+            if (basename($path) === 'cli.php' || str_contains($path, '/plugins/store/') || str_contains($path, '/libs/sleekdb/') || str_contains($path, '/libs/graphql-php/') || str_contains($path, '/libs/polyfill-mbstring/') || str_contains($path, '/.git/')) {
                 continue;
             }
             if ($file->getExtension() === 'php') {

@@ -7,7 +7,7 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 900px;
     margin: 0 auto;
     background: #fff;
     padding: 30px;
@@ -47,4 +47,63 @@ button {
 
 button:hover {
     background-color: #0052a3;
+}
+
+.plugin-card {
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fafbfc;
+}
+
+.plugin-info h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.1em;
+}
+
+.plugin-info p {
+    margin: 3px 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.75em;
+    font-weight: 600;
+    border-radius: 12px;
+    margin-left: 8px;
+}
+
+.badge-system {
+    background-color: #e1f5fe;
+    color: #0288d1;
+}
+
+.badge-enabled {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-disabled {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.btn-toggle {
+    padding: 6px 14px;
+    font-size: 0.85em;
+}
+
+.btn-disable {
+    background-color: #d32f2f;
+}
+
+.btn-disable:hover {
+    background-color: #b71c1c;
 }

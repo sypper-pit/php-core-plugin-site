@@ -23,6 +23,11 @@ class Context
         $this->gqlExecutor = $gqlExecutor;
     }
 
+    public function withCaller(string $caller): Context
+    {
+        return new Context($caller, $this->viewer, $this->request, $this->gqlExecutor);
+    }
+
     public function gql(string $query, array $vars = []): array
     {
         return ($this->gqlExecutor)($query, $vars, $this);

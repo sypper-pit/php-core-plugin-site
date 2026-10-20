@@ -205,6 +205,26 @@ class Engine
         return $e2eeFileType;
     }
 
+    private static function getPluginItemType(): ObjectType
+    {
+        static $pluginType = null;
+        if ($pluginType === null) {
+            $pluginType = new ObjectType([
+                'name' => 'PluginItem',
+                'fields' => [
+                    'id' => Type::string(),
+                    'name' => Type::string(),
+                    'version' => Type::string(),
+                    'description' => Type::string(),
+                    'author' => Type::string(),
+                    'enabled' => Type::boolean(),
+                    'isSystem' => Type::boolean()
+                ]
+            ]);
+        }
+        return $pluginType;
+    }
+
     private static function inferTypeForField(string $fieldName): Type
     {
         $json = self::getJsonScalar();
@@ -221,6 +241,10 @@ class Engine
             'e2ee_status' => self::getE2eeStatusType(),
             'e2ee_list' => Type::listOf(self::getE2eeFileType()),
             'e2ee_get' => $json,
+
+            // Plugin management
+            'admin_plugins' => Type::listOf(self::getPluginItemType()),
+            'admin_toggle_plugin' => Type::boolean(),
 
             // Auth
             'me' => self::getMeType(),
@@ -264,6 +288,10 @@ class Engine
             ],
             'e2ee_put' => [
                 'file' => ['type' => $json]
+            ],
+            'admin_toggle_plugin' => [
+                'id' => ['type' => Type::nonNull(Type::string())],
+                'enable' => ['type' => Type::nonNull(Type::boolean())]
             ],
             'login' => [
                 'username' => ['type' => Type::string()],

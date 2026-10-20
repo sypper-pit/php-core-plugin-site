@@ -32,7 +32,7 @@ class AuthHandler
             throw new \RuntimeException("Too many failed login attempts. Please wait.");
         }
 
-        $res = $context->gql('query($ns: String!, $where: [StoreFilter!]) { store_find(ns: $ns, where: $where) { id data } }', [
+        $res = $context->withCaller('auth')->gql('query($ns: String!, $where: [StoreFilter!]) { store_find(ns: $ns, where: $where) { id data } }', [
             'ns' => 'auth.users',
             'where' => [['field' => 'username', 'op' => 'EQ', 'value' => $username]]
         ]);

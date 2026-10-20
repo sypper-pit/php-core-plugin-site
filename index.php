@@ -33,7 +33,7 @@ $context = new Context('core', $coreViewer, $request, $gqlExecutor);
 
 // Authenticate session
 $viewer = Session::start($context);
-$context = new Context('core', $viewer, $request, $gqlExecutor);
+$context = new Context('http', $viewer, $request, $gqlExecutor);
 \Core\Report::setContext($context);
 
 // Determine Admin Route Path
@@ -62,9 +62,9 @@ if (!Files::existsConfig('installed.lock')) {
                 exit;
             }
 
-            // Create admin user
+            // Create admin user using core caller context
             $passHash = password_hash($password, PASSWORD_ARGON2ID);
-            $res = $context->gql('mutation($ns: String!, $data: JSON!) { store_insert(ns: $ns, data: $data) }', [
+            $res = $context->withCaller('core')->gql('mutation($ns: String!, $data: JSON!) { store_insert(ns: $ns, data: $data) }', [
                 'ns' => 'auth.users',
                 'data' => [
                     'username' => $username,
@@ -73,11 +73,19 @@ if (!Files::existsConfig('installed.lock')) {
                 ]
             ]);
 
+            // Generate random admin path
+            $randomAdminPath = '/admin-' . bin2hex(random_bytes(8));
+            Files::writeConfig('admin-path.json', ['path' => $randomAdminPath]);
+
             // Lock setup atomically
             Files::writeConfig('installed.lock', ['installed_at' => date('c')]);
             Files::removeConfig('setup-token.txt');
 
-            $response->json(['success' => true, 'userId' => $res['data']['store_insert']])->send();
+            $response->json([
+                'success' => true,
+                'userId' => $res['data']['store_insert'],
+                'adminPath' => $randomAdminPath
+            ])->send();
             exit;
         }
 
@@ -129,10 +137,11 @@ if ($uri === '/graphql') {
             exit;
         }
 
-        // CSRF Check for mutations
+        // CSRF Check for mutations (excluding public auth/setup mutations when not authenticated)
         $body = $request->jsonBody ?? [];
         $query = $body['query'] ?? '';
-        if (str_contains(strtolower($query), 'mutation')) {
+        $isPublicAuthMutation = str_contains($query, 'login') || str_contains($query, 'e2ee_init');
+        if (str_contains(strtolower($query), 'mutation') && !$isPublicAuthMutation && $context->viewer->isAuthenticated()) {
             $token = $request->getHeader('x-csrf-token');
             if (!Security::validateCsrfToken($token, $context->viewer->csrfSecret ?? '')) {
                 $response->json(['errors' => [['message' => 'Invalid CSRF token']]], 403)->send();

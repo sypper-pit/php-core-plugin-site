@@ -36,7 +36,7 @@ class AdminPlugin extends Plugin
             $mime = $args['mime'] ?? 'text/plain';
             $enc = Vault::encrypt($args['data'] ?? '');
 
-            return $context->gql('mutation($ns: String!, $data: JSON!) { store_insert(ns: $ns, data: $data) }', [
+            return $context->withCaller('admin')->gql('mutation($ns: String!, $data: JSON!) { store_insert(ns: $ns, data: $data) }', [
                 'ns' => 'core.vault_files',
                 'data' => [
                     'name' => $name,
@@ -49,7 +49,7 @@ class AdminPlugin extends Plugin
         }, ['auth' => 'admin']);
 
         Registry::registerField('query', 'vault_list', function ($args, $context) {
-            $res = $context->gql('query($ns: String!) { store_find(ns: $ns) { id data created } }', ['ns' => 'core.vault_files']);
+            $res = $context->withCaller('admin')->gql('query($ns: String!) { store_find(ns: $ns) { id data created } }', ['ns' => 'core.vault_files']);
             $files = [];
             foreach ($res['data']['store_find'] ?? [] as $f) {
                 $files[] = [
@@ -64,7 +64,7 @@ class AdminPlugin extends Plugin
         }, ['auth' => 'admin']);
 
         Registry::registerField('query', 'vault_get', function ($args, $context) {
-            $res = $context->gql('query($ns: String!, $id: ID!) { store_get(ns: $ns, id: $id) { id data created } }', [
+            $res = $context->withCaller('admin')->gql('query($ns: String!, $id: ID!) { store_get(ns: $ns, id: $id) { id data created } }', [
                 'ns' => 'core.vault_files',
                 'id' => $args['id']
             ]);
@@ -82,7 +82,7 @@ class AdminPlugin extends Plugin
         }, ['auth' => 'admin']);
 
         Registry::registerField('mutation', 'vault_delete', function ($args, $context) {
-            return $context->gql('mutation($ns: String!, $id: ID!) { store_delete(ns: $ns, id: $id) }', [
+            return $context->withCaller('admin')->gql('mutation($ns: String!, $id: ID!) { store_delete(ns: $ns, id: $id) }', [
                 'ns' => 'core.vault_files', 'id' => $args['id']
             ])['data']['store_delete'];
         }, ['auth' => 'admin']);
@@ -109,14 +109,14 @@ class AdminPlugin extends Plugin
             if (!E2ee::validateFileInput($file)) {
                 throw new \InvalidArgumentException('Invalid E2EE file structure');
             }
-            return $context->gql('mutation($ns: String!, $data: JSON!) { store_insert(ns: $ns, data: $data) }', [
+            return $context->withCaller('admin')->gql('mutation($ns: String!, $data: JSON!) { store_insert(ns: $ns, data: $data) }', [
                 'ns' => 'core.e2ee_files',
                 'data' => $file
             ])['data']['store_insert'];
         }, ['auth' => 'admin']);
 
         Registry::registerField('query', 'e2ee_list', function ($args, $context) {
-            $res = $context->gql('query($ns: String!) { store_find(ns: $ns) { id data created } }', ['ns' => 'core.e2ee_files']);
+            $res = $context->withCaller('admin')->gql('query($ns: String!) { store_find(ns: $ns) { id data created } }', ['ns' => 'core.e2ee_files']);
             $out = [];
             foreach ($res['data']['store_find'] ?? [] as $item) {
                 $out[] = [
@@ -129,7 +129,7 @@ class AdminPlugin extends Plugin
         }, ['auth' => 'admin']);
 
         Registry::registerField('query', 'e2ee_get', function ($args, $context) {
-            $res = $context->gql('query($ns: String!, $id: ID!) { store_get(ns: $ns, id: $id) { id data created } }', [
+            $res = $context->withCaller('admin')->gql('query($ns: String!, $id: ID!) { store_get(ns: $ns, id: $id) { id data created } }', [
                 'ns' => 'core.e2ee_files',
                 'id' => $args['id']
             ]);
@@ -141,9 +141,59 @@ class AdminPlugin extends Plugin
         }, ['auth' => 'admin']);
 
         Registry::registerField('mutation', 'e2ee_delete', function ($args, $context) {
-            return $context->gql('mutation($ns: String!, $id: ID!) { store_delete(ns: $ns, id: $id) }', [
+            return $context->withCaller('admin')->gql('mutation($ns: String!, $id: ID!) { store_delete(ns: $ns, id: $id) }', [
                 'ns' => 'core.e2ee_files', 'id' => $args['id']
             ])['data']['store_delete'];
+        }, ['auth' => 'admin']);
+
+        // Plugin Management
+        Registry::registerField('query', 'admin_plugins', function ($args, $context) {
+            $pluginsDir = APP_ROOT . '/plugins';
+            $enabled = \Core\Files::readConfig('plugins-enabled.json') ?? ['gql', 'store', 'auth', 'admin', 'placeholder'];
+            $items = [];
+
+            if (is_dir($pluginsDir)) {
+                $dirs = scandir($pluginsDir);
+                foreach ($dirs as $d) {
+                    if ($d === '.' || $d === '..' || !is_dir("{$pluginsDir}/{$d}")) continue;
+                    $manifestFile = "{$pluginsDir}/{$d}/plugin.json";
+                    if (file_exists($manifestFile)) {
+                        $meta = json_decode((string)file_get_contents($manifestFile), true) ?: [];
+                        $id = $meta['id'] ?? $d;
+                        $items[] = [
+                            'id' => $id,
+                            'name' => $meta['name'] ?? $id,
+                            'version' => $meta['version'] ?? '1.0.0',
+                            'description' => $meta['description'] ?? '',
+                            'author' => $meta['author'] ?? '',
+                            'enabled' => in_array($id, $enabled, true),
+                            'isSystem' => in_array($id, ['gql', 'store', 'auth', 'admin'], true)
+                        ];
+                    }
+                }
+            }
+            return $items;
+        }, ['auth' => 'admin']);
+
+        Registry::registerField('mutation', 'admin_toggle_plugin', function ($args, $context) {
+            $id = strtolower($args['id'] ?? '');
+            $enable = (bool)($args['enable'] ?? false);
+
+            if (in_array($id, ['gql', 'store', 'auth', 'admin'], true) && !$enable) {
+                throw new \InvalidArgumentException("Cannot disable system core plugin '{$id}'");
+            }
+
+            $enabled = \Core\Files::readConfig('plugins-enabled.json') ?? ['gql', 'store', 'auth', 'admin', 'placeholder'];
+            if ($enable) {
+                if (!in_array($id, $enabled, true)) {
+                    $enabled[] = $id;
+                }
+            } else {
+                $enabled = array_values(array_filter($enabled, fn($item) => $item !== $id));
+            }
+
+            \Core\Files::writeConfig('plugins-enabled.json', $enabled);
+            return true;
         }, ['auth' => 'admin']);
     }
 }
