@@ -11,6 +11,7 @@ if (!defined('APP_ROOT')) {
 class Report
 {
     private static ?Context $context = null;
+    private static bool $isLogging = false;
 
     public static function setContext(Context $context): void
     {
@@ -39,16 +40,20 @@ class Report
             'userId' => self::$context ? self::$context->viewer->userId : null,
         ];
 
-        if (self::$context !== null) {
+        if (self::$context !== null && !self::$isLogging) {
+            self::$isLogging = true;
             try {
                 self::$context->gql('mutation($ns: String!, $data: JSON!) { store_insert(ns: $ns, data: $data) }', [
                     'ns' => 'core.errors',
                     'data' => $logEntry
                 ]);
             } catch (\Throwable $e) {
-                // Fallback to error log if store failed
                 error_log("Failed to log error to store: " . $e->getMessage());
+            } finally {
+                self::$isLogging = false;
             }
+        } else {
+            error_log("Error logged: " . $sanitized);
         }
 
         return $incidentId;

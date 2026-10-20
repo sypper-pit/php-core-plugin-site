@@ -214,7 +214,12 @@ class Parser
             $varName = $this->expect('NAME')['value'];
             $this->expect('PUNCT', ':');
             $varType = $this->expect('NAME')['value'];
-            $vars[$varName] = ['type' => $varType];
+            $nonNull = false;
+            if ($this->peek()['type'] === 'PUNCT' && $this->peek()['value'] === '!') {
+                $this->consume();
+                $nonNull = true;
+            }
+            $vars[$varName] = ['type' => $varType, 'nonNull' => $nonNull];
         }
         $this->expect('PUNCT', ')');
         return $vars;
