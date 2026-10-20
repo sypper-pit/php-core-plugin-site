@@ -155,17 +155,23 @@ class Parser
     private function consume(): array
     {
         $tok = $this->peek();
+        if ($tok['type'] === 'EOF') {
+            throw new \RuntimeException("Unexpected end of GraphQL query input");
+        }
         $this->pos++;
         return $tok;
     }
 
     private function expect(string $type, ?string $value = null): array
     {
-        $tok = $this->consume();
+        $tok = $this->peek();
+        if ($tok['type'] === 'EOF') {
+            throw new \RuntimeException("Unexpected end of GraphQL input, expected {$type} '{$value}'");
+        }
         if ($tok['type'] !== $type || ($value !== null && $tok['value'] !== $value)) {
             throw new \RuntimeException("Expected {$type} '{$value}', got {$tok['type']} '{$tok['value']}'");
         }
-        return $tok;
+        return $this->consume();
     }
 
     private function parseOperation(): array
@@ -201,6 +207,9 @@ class Parser
         $this->expect('PUNCT', '(');
         $vars = [];
         while ($this->peek()['value'] !== ')') {
+            if ($this->peek()['type'] === 'EOF') {
+                throw new \RuntimeException("Unexpected end of query inside variable definitions");
+            }
             $this->expect('PUNCT', '$');
             $varName = $this->expect('NAME')['value'];
             $this->expect('PUNCT', ':');
@@ -216,8 +225,10 @@ class Parser
         $this->expect('PUNCT', '{');
         $selections = [];
         while ($this->peek()['value'] !== '}') {
+            if ($this->peek()['type'] === 'EOF') {
+                throw new \RuntimeException("Unexpected end of query inside selection set");
+            }
             if ($this->peek()['type'] === 'PUNCT' && $this->peek()['value'] === '...') {
-                // Fragment spread or inline fragment
                 $this->consume();
                 if ($this->peek()['type'] === 'NAME' && $this->peek()['value'] === 'on') {
                     $this->consume();
@@ -274,6 +285,9 @@ class Parser
         $this->expect('PUNCT', '(');
         $args = [];
         while ($this->peek()['value'] !== ')') {
+            if ($this->peek()['type'] === 'EOF') {
+                throw new \RuntimeException("Unexpected end of query inside arguments");
+            }
             $argName = $this->expect('NAME')['value'];
             $this->expect('PUNCT', ':');
             $val = $this->parseValue();
@@ -286,6 +300,9 @@ class Parser
     private function parseValue(): mixed
     {
         $tok = $this->peek();
+        if ($tok['type'] === 'EOF') {
+            throw new \RuntimeException("Unexpected end of query inside value");
+        }
         if ($tok['type'] === 'PUNCT' && $tok['value'] === '$') {
             $this->consume();
             return ['kind' => 'Variable', 'name' => $this->expect('NAME')['value']];
@@ -299,12 +316,15 @@ class Parser
             if ($tok['value'] === 'true') return true;
             if ($tok['value'] === 'false') return false;
             if ($tok['value'] === 'null') return null;
-            return $tok['value']; // enum or identifier
+            return $tok['value'];
         }
         if ($tok['type'] === 'PUNCT' && $tok['value'] === '[') {
             $this->consume();
             $list = [];
             while ($this->peek()['value'] !== ']') {
+                if ($this->peek()['type'] === 'EOF') {
+                    throw new \RuntimeException("Unexpected end of query inside list value");
+                }
                 $list[] = $this->parseValue();
             }
             $this->expect('PUNCT', ']');
@@ -314,6 +334,9 @@ class Parser
             $this->consume();
             $obj = [];
             while ($this->peek()['value'] !== '}') {
+                if ($this->peek()['type'] === 'EOF') {
+                    throw new \RuntimeException("Unexpected end of query inside object value");
+                }
                 $k = $this->expect('NAME')['value'];
                 $this->expect('PUNCT', ':');
                 $obj[$k] = $this->parseValue();
