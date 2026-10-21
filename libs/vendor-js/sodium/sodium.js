@@ -1,1 +1,7 @@
-Couldn't find the requested file /dist/browsers/sodium.js in libsodium-wrappers-sumo.
+<html>
+<head><title>404 Not Found</title></head>
+<body>
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx</center>
+</body>
+</html>
