@@ -1,0 +1,7 @@
+{
+  "id": "auth",
+  "name": "Authentication & User Management",
+  "version": "1.0.0",
+  "system": false,
+  "grants": ["session", "db:own"]
+}

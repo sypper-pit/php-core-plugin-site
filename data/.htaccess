@@ -1,0 +1,5 @@
+# Protect private directory
+Require all denied
+<Files "index.html">
+    Require all denied
+</Files>

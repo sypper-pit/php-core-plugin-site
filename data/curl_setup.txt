@@ -1,0 +1,37 @@
+HTTP/1.1 200 OK
+Host: 127.0.0.1
+Date: Wed, 21 Oct 2026 13:30:08 GMT
+Connection: close
+Content-Security-Policy: default-src 'none'; script-src 'self' 'nonce-tMCQoP6U13oKp3sf5gbe5A==' 'wasm-unsafe-eval'; style-src 'self' 'nonce-tMCQoP6U13oKp3sf5gbe5A=='; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'; object-src 'none'
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+Referrer-Policy: no-referrer
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Resource-Policy: same-origin
+Content-Type: text/html; charset=utf-8
+
+
+<!DOCTYPE html>
+<html>
+<head><title>Setup Application</title><link rel='stylesheet' href='/assets/app/app.css'></head>
+<body>
+<div class='container'>
+    <h2>First Time Application Setup</h2>
+    <form id='setupForm'>
+
+        <label>Admin Username: <input type='text' name='username' required></label><br>
+        <label>Admin Password: <input type='password' name='password' id='adminPassword' required></label><br>
+        <label>Confirm Admin Password: <input type='password' name='confirmPassword' id='confirmAdminPassword' required></label><br>
+        <label>Master Password (E2EE): <input type='password' id='masterPassword' name='masterPassword' required></label><br>
+        <label>Confirm Master Password: <input type='password' id='confirmMasterPassword' name='confirmMasterPassword' required></label><br>
+        <button type='submit'>Complete Setup</button>
+    </form>
+    <div id='setupMsg'></div>
+</div>
+<script src='/libs/vendor-js/sodium/sodium.js'></script>
+<script src='/assets/e2ee/e2ee-worker.js'></script>
+<script src='/assets/e2ee/e2ee-client.js'></script>
+<script src='/assets/app/app.js'></script>
+</body>
+</html>
