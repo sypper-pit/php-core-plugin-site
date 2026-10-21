@@ -1,0 +1,7 @@
+{
+  "id": "store",
+  "name": "SleekDB Storage Gateway",
+  "version": "1.0.0",
+  "system": true,
+  "grants": ["*"]
+}
