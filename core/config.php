@@ -7,7 +7,7 @@ if (!defined('APP_ROOT')) {
 }
 
 return [
-    'allowed_hosts' => ['localhost', '127.0.0.1', 'localhost:8000', '127.0.0.1:8080', 'localhost:8080'],
+    'allowed_hosts' => ['localhost', '127.0.0.1', 'localhost:8000'],
     'max_body_size' => 4 * 1024 * 1024, // 4MB
     'admin_path_default' => '/panel-admin',
     'session_idle_timeout' => 1800, // 30 minutes

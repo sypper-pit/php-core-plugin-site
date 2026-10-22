@@ -32,6 +32,7 @@ window.E2EEClient = (function() {
     async function initClient(masterPassword) {
         const sodium = getSodium();
         await sodium.ready;
+
         const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
         const ops = sodium.crypto_pwhash_OPSLIMIT_MODERATE;
         const mem = sodium.crypto_pwhash_MEMLIMIT_MODERATE;
@@ -94,6 +95,7 @@ window.E2EEClient = (function() {
     async function unlockClient(masterPassword, envelope) {
         const sodium = getSodium();
         await sodium.ready;
+
         const salt = sodium.from_base64(envelope.kdf.salt);
         const kek = sodium.crypto_pwhash(
             32,
