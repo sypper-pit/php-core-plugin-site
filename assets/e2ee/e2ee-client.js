@@ -33,9 +33,17 @@ window.E2EEClient = (function() {
         const sodium = getSodium();
         await sodium.ready;
 
-        const salt = sodium.randombytes_buf(sodium.crypto_pwhash_SALTBYTES);
-        const ops = sodium.crypto_pwhash_OPSLIMIT_MODERATE;
-        const mem = sodium.crypto_pwhash_MEMLIMIT_MODERATE;
+        if (typeof sodium.crypto_pwhash !== 'function') {
+            throw new Error('Argon2id KDF (crypto_pwhash) is missing in the loaded libsodium library. Please hard-refresh your browser cache (Ctrl+F5).');
+        }
+
+        const saltBytes = sodium.crypto_pwhash_SALTBYTES || 16;
+        const ops = sodium.crypto_pwhash_OPSLIMIT_MODERATE || 3;
+        const mem = sodium.crypto_pwhash_MEMLIMIT_MODERATE || 268435456;
+        const alg = sodium.crypto_pwhash_ALG_ARGON2ID13 || 2;
+        const npub = sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES || 24;
+
+        const salt = sodium.randombytes_buf(saltBytes);
 
         const kek = sodium.crypto_pwhash(
             32,
@@ -43,11 +51,11 @@ window.E2EEClient = (function() {
             salt,
             ops,
             mem,
-            sodium.crypto_pwhash_ALG_ARGON2ID13
+            alg
         );
 
         dek = sodium.randombytes_buf(32);
-        const nonce = sodium.randombytes_buf(sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
+        const nonce = sodium.randombytes_buf(npub);
         const wrappedDek = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
             dek,
             sodium.from_string('dek|v1'),
@@ -57,7 +65,7 @@ window.E2EEClient = (function() {
         );
 
         const recoveryKey = sodium.randombytes_buf(32);
-        const recNonce = sodium.randombytes_buf(sodium.crypto_aead_xchacha20poly1305_ietf_NPUBBYTES);
+        const recNonce = sodium.randombytes_buf(npub);
         const wrappedRec = sodium.crypto_aead_xchacha20poly1305_ietf_encrypt(
             dek,
             sodium.from_string('rec|v1'),
@@ -96,6 +104,11 @@ window.E2EEClient = (function() {
         const sodium = getSodium();
         await sodium.ready;
 
+        if (typeof sodium.crypto_pwhash !== 'function') {
+            throw new Error('Argon2id KDF (crypto_pwhash) is missing in the loaded libsodium library. Please hard-refresh your browser cache (Ctrl+F5).');
+        }
+
+        const alg = sodium.crypto_pwhash_ALG_ARGON2ID13 || 2;
         const salt = sodium.from_base64(envelope.kdf.salt);
         const kek = sodium.crypto_pwhash(
             32,
@@ -103,7 +116,7 @@ window.E2EEClient = (function() {
             salt,
             envelope.kdf.ops,
             envelope.kdf.mem,
-            sodium.crypto_pwhash_ALG_ARGON2ID13
+            alg
         );
 
         const nonce = sodium.from_base64(envelope.wrap_dek.nonce);

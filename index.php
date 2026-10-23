@@ -112,10 +112,10 @@ if (!Files::existsConfig('installed.lock')) {
     </form>
     <div id='setupMsg'></div>
 </div>
-<script src='/libs/vendor-js/sodium/sodium.js'></script>
-<script src='/assets/e2ee/e2ee-worker.js'></script>
-<script src='/assets/e2ee/e2ee-client.js'></script>
-<script src='/assets/app/app.js'></script>
+<script src='/libs/vendor-js/sodium/sodium.js?v=0.8.4-sumo'></script>
+<script src='/assets/e2ee/e2ee-worker.js?v=1'></script>
+<script src='/assets/e2ee/e2ee-client.js?v=1'></script>
+<script src='/assets/app/app.js?v=1'></script>
 </body>
 </html>";
         $response->html($html)->send();
@@ -189,9 +189,9 @@ if ($uri === $adminPath) {
     <h1>Administration Dashboard</h1>
     <div id='adminApp'></div>
 </div>
-<script nonce='{$nonce}' src='/libs/vendor-js/sodium/sodium.js'></script>
-<script nonce='{$nonce}' src='/assets/e2ee/e2ee-client.js'></script>
-<script nonce='{$nonce}' src='/assets/app/app.js'></script>
+<script nonce='{$nonce}' src='/libs/vendor-js/sodium/sodium.js?v=0.8.4-sumo'></script>
+<script nonce='{$nonce}' src='/assets/e2ee/e2ee-client.js?v=1'></script>
+<script nonce='{$nonce}' src='/assets/app/app.js?v=1'></script>
 </body>
 </html>";
     $response->html($html)->send();

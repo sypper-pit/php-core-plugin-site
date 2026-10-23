@@ -1,5 +1,5 @@
 b798a071cc28a98ac5fd781d22995af58eea08ca1bcfe59d281bdd122141a541  libs/vendor-js/sodium/sodium.js
-e25fdb556f67ffc3d280ccf80feffc6f20ba43d2e4566aa777e92925f065d1fd  assets/e2ee/e2ee-client.js
+70f58c478a1ec03af648c88ff99df1eb71d3117fb78fd0306d5efccc9d7951fb  assets/e2ee/e2ee-client.js
 871d04ce03615a402cf83a9ca7ef8aa10c6f5cdc4ecf1d811acea5cf964dbede  assets/e2ee/e2ee-worker.js
 01bffce62697d18db8718e350de0b3ed2b8478eef231bdd15fd6a8e78145a148  assets/app/app.js
 c3c7505def1184d8d956f6a5edd638881afe834965b08c9406cc3feb083ce8c9  assets/app/app.css
