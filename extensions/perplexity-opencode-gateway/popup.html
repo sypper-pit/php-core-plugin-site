@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Perplexity Gateway for OpenCode</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --success: #22c55e;
+      --danger: #ef4444;
+      --border: #334155;
+    }
+    body {
+      width: 380px;
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      box-sizing: border-box;
+    }
+    h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--border);
+    }
+    .badge.active {
+      background: #15803d;
+      color: #fff;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .stat-row:last-child {
+      margin-bottom: 0;
+    }
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 4px;
+      margin-bottom: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s;
+    }
+    label {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+    input[type="number"], input[type="text"], textarea {
+      width: 100%;
+      box-sizing: border-box;
+      background: #0b1120;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 8px;
+      color: #fff;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+    button {
+      width: 100%;
+      background: var(--accent);
+      border: none;
+      color: #0f172a;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: var(--accent-hover);
+    }
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text);
+      margin-top: 6px;
+    }
+    .btn-secondary:hover {
+      background: #475569;
+    }
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--danger);
+      margin-right: 6px;
+    }
+    .status-indicator.connected {
+      background: var(--success);
+    }
+    #testResponse {
+      margin-top: 8px;
+      padding: 8px;
+      background: #090d16;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      max-height: 120px;
+      overflow-y: auto;
+      font-size: 11px;
+      white-space: pre-wrap;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h2>
+    Perplexity Gateway
+    <span id="tabBadge" class="badge">Вкладка: Ожидание</span>
+  </h2>
+
+  <!-- Status card -->
+  <div class="card">
+    <div class="stat-row">
+      <span><span id="agentDot" class="status-indicator"></span>Мост OpenCode:</span>
+      <span id="agentStatus">127.0.0.1:8085</span>
+    </div>
+    <div class="stat-row">
+      <span>Запросов за час:</span>
+      <span id="hourStats">0 / 100</span>
+    </div>
+    <div class="progress-bar">
+      <div id="hourProgress" class="progress-fill"></div>
+    </div>
+    <div class="stat-row">
+      <span>Запросов сегодня:</span>
+      <span id="dayStats">0 / 500</span>
+    </div>
+    <div class="progress-bar">
+      <div id="dayProgress" class="progress-fill"></div>
+    </div>
+  </div>
+
+  <!-- Configuration -->
+  <div class="card">
+    <label for="wsPort">Порт моста OpenCode (WebSocket / HTTP Relay):</label>
+    <input type="number" id="wsPort" value="8085">
+
+    <label for="maxPerHour">Лимит в час:</label>
+    <input type="number" id="maxPerHour" value="100">
+
+    <label for="maxPerDay">Лимит в день:</label>
+    <input type="number" id="maxPerDay" value="500">
+
+    <button id="saveBtn">Сохранить настройки</button>
+  </div>
+
+  <!-- Manual Test -->
+  <div class="card">
+    <label for="testPrompt">Проверить запрос в Perplexity:</label>
+    <input type="text" id="testPrompt" placeholder="Например: привет, кто ты?">
+    <button id="sendTestBtn">Отправить тестовый запрос</button>
+    <div id="testResponse"></div>
+  </div>
+
+  <button class="btn-secondary" id="openPerplexityBtn">Открыть Perplexity.ai</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
